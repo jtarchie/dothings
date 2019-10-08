@@ -42,8 +42,8 @@ func (t *Task) ID() string {
 func (t *Task) Execute(stdout io.Writer, stderr io.Writer) (status.Type, error) {
 	workingPath := fmt.Sprintf("/tmp/build/%s", generateBuildGUID())
 	runner := t.containerManager
-	runner.WorkingDir(workingPath)
 
+	t.setupWorkingDirectory(runner, workingPath)
 	t.setupInputs(workingPath)
 	t.setupOutputs(workingPath)
 	t.setupParams()
@@ -68,6 +68,14 @@ func (t *Task) Execute(stdout io.Writer, stderr io.Writer) (status.Type, error) 
 	}
 
 	return status.Success, nil
+}
+
+func (t *Task) setupWorkingDirectory(runner containerManager, workingPath string) {
+	if t.step.Task.Config.Run.Dir != "" {
+		runner.WorkingDir(fmt.Sprintf("%s/%s", workingPath, t.step.Task.Config.Run.Dir))
+	} else {
+		runner.WorkingDir(workingPath)
+	}
 }
 
 func (t *Task) setupImage() error {
@@ -129,6 +137,9 @@ func (t *Task) setupOutputs(workingPath string) {
 }
 
 func (t *Task) setupCommand() {
+	if t.step.Task.Config.Run.User != "" {
+		t.containerManager.User(t.step.Task.Config.Run.User)
+	}
 	t.containerManager.Command(t.step.Task.Config.Run.Path, t.step.Task.Config.Run.Args...)
 }
 

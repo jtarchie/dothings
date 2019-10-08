@@ -30,6 +30,7 @@ type task struct {
 			Path string
 			Args []string
 			Dir  string
+			User string
 		}
 		Params  map[string]string
 		Inputs  inputs

@@ -40,6 +40,8 @@ jobs:
       run:
         path: echo
         args: ["hello world"]
+        user: not-root
+        dir: named-output
 `
 
 var _ = Describe("Task", func() {
@@ -77,7 +79,12 @@ var _ = Describe("Task", func() {
 
 		It("set the correct working directory", func() {
 			_, _ = task.Execute(ioutil.Discard, ioutil.Discard)
-			Expect(containerManager.WorkingDirArgsForCall(0)).To(MatchRegexp(`/tmp/build/\w{6}`))
+			Expect(containerManager.WorkingDirArgsForCall(0)).To(MatchRegexp(`/tmp/build/\w{6}/named-output`))
+		})
+
+		It("sets the correct user", func() {
+			_, _ = task.Execute(ioutil.Discard, ioutil.Discard)
+			Expect(containerManager.UserArgsForCall(0)).To(Equal("not-root"))
 		})
 
 		It("setups inputs in the working directory", func() {
