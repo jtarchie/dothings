@@ -1,0 +1,46 @@
+resources:
+  - name: alpine/git
+    type: registry-image
+    source:
+      repository: alpine/git
+  - name: repo
+    type: git
+    source:
+      uri: git@github.com:jtarchie/timebased-testing
+      private_key: ((ssh_private_key))
+      branch: master
+
+jobs:
+  - name: make-commit
+    plan:
+    - in_parallel:
+      - get: alpine/git
+      - get: repo
+    - do:
+      - task: example
+        image: alpine/git
+        config:
+          platform: linux
+          inputs:
+          - name: repo
+          outputs:
+          - name: repo-updated
+          run:
+            path: sh
+            args:
+              - -c
+              - |
+                set -eux
+                git config --global user.email "bot@example.com"
+                git config --global user.name  "Bot"
+
+                cd repo
+                echo "$(date)" > README.txt
+                git add README.txt
+                git commit -m "update README.txt"
+                cd ..
+
+                git clone repo repo-updated
+    - put: repo
+      params:
+        repository: repo-updated
