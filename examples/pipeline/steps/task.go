@@ -102,18 +102,28 @@ func (t *Task) setupParams() {
 
 func (t *Task) setupInputs(workingPath string) {
 	for _, input := range t.step.Task.Config.Inputs {
+		path := input.Name
+		if input.Path != "" {
+			path = input.Path
+		}
+
 		t.containerManager.Volume(
 			t.volumeManager.Get(input.Name, false),
-			fmt.Sprintf("%s/%s", workingPath, input.Name),
+			fmt.Sprintf("%s/%s", workingPath, path),
 		)
 	}
 }
 
 func (t *Task) setupOutputs(workingPath string) {
 	for _, output := range t.step.Task.Config.Outputs {
+		path := output.Name
+		if output.Path != "" {
+			path = output.Path
+		}
+
 		t.containerManager.Volume(
 			t.volumeManager.Get(output.Name, false),
-			fmt.Sprintf("%s/%s", workingPath, output.Name),
+			fmt.Sprintf("%s/%s", workingPath, path),
 		)
 	}
 }

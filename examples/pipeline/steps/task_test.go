@@ -30,6 +30,10 @@ jobs:
       inputs:
       - name: resource-a
       - name: output-1
+        path: named-input
+      outputs:
+      - name: output-2
+        path: named-output
       params:
         B: 2
         A: 1
@@ -38,7 +42,7 @@ jobs:
         args: ["hello world"]
 `
 
-var _ = Describe("PutResource", func() {
+var _ = Describe("Task", func() {
 	It("returns a unique ID", func() {
 		check := steps.NewTask(
 			newTask(validTask),
@@ -85,7 +89,15 @@ var _ = Describe("PutResource", func() {
 
 			from, to = containerManager.VolumeArgsForCall(1)
 			Expect(from).To(Equal(""))
-			Expect(to).To(MatchRegexp(`/tmp/build/\w{6}/output-1`))
+			Expect(to).To(MatchRegexp(`/tmp/build/\w{6}/named-input`))
+		})
+
+		It("setups outputs in the working directory", func() {
+			_, _ = task.Execute(ioutil.Discard, ioutil.Discard)
+
+			from, to := containerManager.VolumeArgsForCall(2)
+			Expect(from).To(Equal(""))
+			Expect(to).To(MatchRegexp(`/tmp/build/\w{6}/named-output`))
 		})
 
 		It("sets the params as environment variables in sorted order", func() {

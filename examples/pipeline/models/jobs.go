@@ -6,12 +6,14 @@ import (
 
 type input struct {
 	Name string
+	Path string
 }
 
 type inputs []input
 
 type output struct {
 	Name string
+	Path string
 }
 
 type outputs []output
