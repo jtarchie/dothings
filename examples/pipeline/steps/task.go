@@ -17,15 +17,15 @@ import (
 
 type Task struct {
 	step             models.Step
-	volumeManager    volumeManager
-	containerManager containerManager
+	volumeManager    VolumeManager
+	containerManager ContainerManager
 	timestamp        int64
 }
 
 func NewTask(
 	step models.Step,
-	volumeManager volumeManager,
-	containerManager containerManager,
+	volumeManager VolumeManager,
+	containerManager ContainerManager,
 ) *Task {
 	return &Task{
 		step:             step,
@@ -70,7 +70,7 @@ func (t *Task) Execute(stdout io.Writer, stderr io.Writer) (status.Type, error) 
 	return status.Success, nil
 }
 
-func (t *Task) setupWorkingDirectory(runner containerManager, workingPath string) {
+func (t *Task) setupWorkingDirectory(runner ContainerManager, workingPath string) {
 	if t.step.Task.Config.Run.Dir != "" {
 		runner.WorkingDir(fmt.Sprintf("%s/%s", workingPath, t.step.Task.Config.Run.Dir))
 	} else {

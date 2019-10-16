@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/jtarchie/dothings/examples/pipeline/steps/managers/docker"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -25,13 +26,17 @@ func main() {
 		log.Fatalf("could not read config file: %s", err)
 	}
 
-	var pipeline models.Pipeline
+	pipeline := models.NewPipeline(models.ResourceTypes{
+		models.ResourceType{Name: "registry-image", Type: "", Source: nil},
+		models.ResourceType{Name: "docker-image", Type: "registry-image", Source: nil},
+		models.ResourceType{Name: "git", Type: "registry-image", Source: nil},
+	})
 	err = yaml.UnmarshalStrict(contents, &pipeline)
 	if err != nil {
 		log.Fatalf("could not unmarshal pipeline from config file: %s", err)
 	}
 
-	builder := steps.NewBuilder(pipeline)
+	builder := steps.NewBuilder(pipeline, docker.NewFactory())
 	plan, err := builder.PlanForJob(pipeline.Jobs[0].Name)
 	if err != nil {
 		log.Fatalf("could not build plan for pipeline: %s", err)

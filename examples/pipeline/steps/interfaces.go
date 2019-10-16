@@ -15,14 +15,14 @@ type versionManager interface {
 	SetLatestVersion(*models.Resource, managers.Version)
 }
 
-//counterfeiter:generate . volumeManager
-type volumeManager interface {
+//counterfeiter:generate . VolumeManager
+type VolumeManager interface {
 	Get(string, bool) string
 	All() map[string]string
 }
 
-//counterfeiter:generate . containerManager
-type containerManager interface {
+//counterfeiter:generate . ContainerManager
+type ContainerManager interface {
 	Volume(local string, mountAs string)
 	WorkingDir(dir string)
 	Command(command string, args ...string)
@@ -36,4 +36,11 @@ type containerManager interface {
 		stdout io.Writer,
 		stderr io.Writer,
 	) error
+}
+
+
+//counterfeiter:generate . factory
+type factory interface {
+	VolumeManager() VolumeManager
+	NewContainerManager() ContainerManager
 }

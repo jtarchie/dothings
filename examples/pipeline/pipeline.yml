@@ -1,8 +1,3 @@
-resource_types:
-  - name: registry-image
-    type: docker-image
-    source:
-      repository: concourse/registry-image
 resources:
   - name: alpine/git
     type: registry-image

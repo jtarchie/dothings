@@ -1,8 +1,6 @@
-package managers_test
+package docker_test
 
 import (
-	"archive/tar"
-	"github.com/jtarchie/dothings/examples/pipeline/steps/managers"
 	"github.com/jtarchie/dothings/examples/pipeline/steps/managers/docker"
 	"github.com/jtarchie/dothings/examples/pipeline/steps/managers/docker/dockerfakes"
 	. "github.com/onsi/ginkgo"
@@ -10,8 +8,6 @@ import (
 	"github.com/onsi/gomega/gbytes"
 	"io"
 	"io/ioutil"
-	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -20,7 +16,7 @@ var _ = Describe("DockerManager", func() {
 		workingDir, err := ioutil.TempDir("", "")
 		Expect(err).NotTo(HaveOccurred())
 
-		runner := managers.NewDockerManager(docker.DefaultExecutor)
+		runner := docker.NewDockerManager(docker.DefaultExecutor)
 		runner.WorkingDir(workingDir)
 		runner.Command("bash", "-c", `cat - && env && pwd && echo "hello stderr" 1>&2`)
 		runner.Image("ubuntu", "latest")
@@ -72,7 +68,7 @@ var _ = Describe("DockerManager", func() {
 			workingDir, err := ioutil.TempDir("", "")
 			Expect(err).NotTo(HaveOccurred())
 
-			runner := managers.NewDockerManager(executor)
+			runner :=docker.NewDockerManager(executor)
 			runner.WorkingDir(workingDir)
 			runner.Command("bash", "-c", `pwd`)
 			runner.ImageFromOCI(ociDir)
@@ -95,7 +91,7 @@ var _ = Describe("DockerManager", func() {
 	When("privileged is set", func() {
 		It("starts the container in privileged mode", func() {
 			executor := &dockerfakes.FakeCommandExecutor{}
-			runner := managers.NewDockerManager(executor)
+			runner :=docker.NewDockerManager(executor)
 			runner.WorkingDir("/tmp")
 			runner.Image("ubuntu", "")
 			runner.Command("bash")
@@ -116,7 +112,7 @@ var _ = Describe("DockerManager", func() {
 	When("user is set", func() {
 		It("starts the container with that user", func() {
 			executor := &dockerfakes.FakeCommandExecutor{}
-			runner := managers.NewDockerManager(executor)
+			runner :=docker.NewDockerManager(executor)
 			runner.WorkingDir("/tmp")
 			runner.Image("ubuntu", "")
 			runner.Command("bash")
@@ -136,7 +132,7 @@ var _ = Describe("DockerManager", func() {
 
 	When("values are not provided", func() {
 		It("errors on missing working dir", func() {
-			runner := managers.NewDockerManager(noopExecutor)
+			runner :=docker.NewDockerManager(noopExecutor)
 			runner.Command("bash")
 			runner.Image("ubuntu", "")
 
@@ -149,7 +145,7 @@ var _ = Describe("DockerManager", func() {
 		})
 
 		It("errors on missing command", func() {
-			runner := managers.NewDockerManager(noopExecutor)
+			runner :=docker.NewDockerManager(noopExecutor)
 			runner.WorkingDir("/tmp")
 			runner.Image("ubuntu", "")
 
@@ -162,7 +158,7 @@ var _ = Describe("DockerManager", func() {
 		})
 
 		It("errors on missing image", func() {
-			runner := managers.NewDockerManager(noopExecutor)
+			runner :=docker.NewDockerManager(noopExecutor)
 			runner.WorkingDir("/tmp")
 			runner.Command("bash")
 
@@ -185,34 +181,3 @@ var noopExecutor = docker.Executor(func(
 ) error {
 	return nil
 })
-
-func writeTarball(directory string, files map[string]string) string {
-	tarball, err := ioutil.TempFile(directory, "*.tar")
-	Expect(err).NotTo(HaveOccurred())
-
-	tw := tar.NewWriter(tarball)
-
-	for filename, contents := range files {
-		hdr := &tar.Header{
-			Name: filename,
-			Mode: 0600,
-			Size: int64(len(contents)),
-		}
-		err := tw.WriteHeader(hdr)
-		Expect(err).NotTo(HaveOccurred())
-
-		_, err = tw.Write([]byte(contents))
-		Expect(err).NotTo(HaveOccurred())
-	}
-	err = tw.Close()
-	Expect(err).NotTo(HaveOccurred())
-
-	return tarball.Name()
-}
-
-func writeFiles(directory string, files map[string]string) {
-	for file, contents := range files {
-		err := ioutil.WriteFile(filepath.Join(directory, file), []byte(contents), os.ModePerm)
-		Expect(err).NotTo(HaveOccurred())
-	}
-}

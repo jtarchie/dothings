@@ -1,9 +1,8 @@
-package managers
+package docker
 
 import (
 	"crypto/rand"
 	"encoding/base32"
-	"github.com/jtarchie/dothings/examples/pipeline/steps/managers/docker"
 	"log"
 	"os"
 	"sync"
@@ -12,7 +11,7 @@ import (
 type resourceVolumeManager struct {
 	sync.Mutex
 	volumes         map[string]string
-	commandExecutor docker.CommandExecutor
+	commandExecutor CommandExecutor
 }
 
 func (vm *resourceVolumeManager) Get(name string, force bool) string {
@@ -50,7 +49,7 @@ func (vm *resourceVolumeManager) All() map[string]string {
 }
 
 func NewResourceVolumeManager(
-	commandExecutor docker.CommandExecutor,
+	commandExecutor CommandExecutor,
 ) *resourceVolumeManager {
 	return &resourceVolumeManager{
 		volumes:         map[string]string{},

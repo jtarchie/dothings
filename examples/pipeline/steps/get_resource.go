@@ -16,8 +16,8 @@ import (
 type GetResource struct {
 	resource         *models.Resource
 	versionManager   versionManager
-	volumeManager    volumeManager
-	containerManager containerManager
+	volumeManager    VolumeManager
+	containerManager ContainerManager
 	params           map[string]interface{}
 	timestamp        int64
 }
@@ -25,8 +25,8 @@ type GetResource struct {
 func NewGetResource(
 	r *models.Resource,
 	versionManager versionManager,
-	volumeManager volumeManager,
-	containerManger containerManager,
+	volumeManager VolumeManager,
+	containerManger ContainerManager,
 	params map[string]interface{},
 ) *GetResource {
 	return &GetResource{

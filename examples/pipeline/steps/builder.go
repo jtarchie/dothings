@@ -2,26 +2,22 @@ package steps
 
 import (
 	"fmt"
-	"github.com/jtarchie/dothings/examples/pipeline/steps/managers/docker"
-
 	"github.com/jtarchie/dothings/examples/pipeline/models"
 	"github.com/jtarchie/dothings/examples/pipeline/steps/managers"
 	"github.com/jtarchie/dothings/planner"
 )
 
 type builder struct {
-	pipeline       models.Pipeline
+	pipeline       *models.Pipeline
 	versionManager versionManager
-	volumeManager  volumeManager
-	//containerManager containerManager
+	factory        factory
 }
 
-func NewBuilder(pipeline models.Pipeline) *builder {
+func NewBuilder(pipeline *models.Pipeline, factory factory) *builder {
 	return &builder{
 		pipeline:       pipeline,
 		versionManager: managers.NewResourceVersionManager(),
-		volumeManager:  managers.NewResourceVolumeManager(docker.DefaultExecutor),
-		//containerManager: managers.NewDockerManager(),
+		factory:        factory,
 	}
 }
 
@@ -83,31 +79,30 @@ func (b *builder) setupPut(step models.Step, plan planner.Planner) error {
 	if resource == nil {
 		return fmt.Errorf("resource '%s' not found for put", resourceName)
 	}
-	plan.Serial(func(plan planner.Planner) error {
+	return plan.Serial(func(plan planner.Planner) error {
 		plan.Task(NewPutResource(
 			resource,
 			b.versionManager,
-			b.volumeManager,
-			managers.NewDockerManager(docker.DefaultExecutor),
+			b.factory.VolumeManager(),
+			b.factory.NewContainerManager(),
 			step.Params,
 		))
 		plan.Task(NewGetResource(
 			resource,
 			b.versionManager,
-			b.volumeManager,
-			managers.NewDockerManager(docker.DefaultExecutor),
+			b.factory.VolumeManager(),
+			b.factory.NewContainerManager(),
 			step.Put.GetParams,
 		))
 		return nil
 	})
-	return nil
 }
 
 func (b *builder) setupTask(plan planner.Planner, step models.Step) {
 	plan.Task(NewTask(
 		step,
-		b.volumeManager,
-		managers.NewDockerManager(docker.DefaultExecutor),
+		b.factory.VolumeManager(),
+		b.factory.NewContainerManager(),
 	))
 }
 
@@ -117,20 +112,19 @@ func (b *builder) setupGet(step models.Step, plan planner.Planner) error {
 	if resource == nil {
 		return fmt.Errorf("resource '%s' not found for get", resourceName)
 	}
-	plan.Serial(func(plan planner.Planner) error {
+	return plan.Serial(func(plan planner.Planner) error {
 		plan.Task(NewCheckResource(
 			resource,
 			b.versionManager,
-			managers.NewDockerManager(docker.DefaultExecutor),
+			b.factory.NewContainerManager(),
 		))
 		plan.Task(NewGetResource(
 			resource,
 			b.versionManager,
-			b.volumeManager,
-			managers.NewDockerManager(docker.DefaultExecutor),
+			b.factory.VolumeManager(),
+			b.factory.NewContainerManager(),
 			step.Params,
 		))
 		return nil
 	})
-	return nil
 }

@@ -15,6 +15,5 @@ var _ = Describe("Parsing a pipeline from YAML", func() {
 
 		Expect(len(pipeline.Resources)).To(BeNumerically(">=", 1))
 		Expect(len(pipeline.Jobs)).To(BeNumerically(">=", 1))
-		Expect(len(pipeline.ResourceTypes)).To(BeNumerically(">=", 1))
 	})
 })

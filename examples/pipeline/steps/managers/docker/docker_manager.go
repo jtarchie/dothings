@@ -1,8 +1,7 @@
-package managers
+package docker
 
 import (
 	"fmt"
-	"github.com/jtarchie/dothings/examples/pipeline/steps/managers/docker"
 	"io"
 	"sort"
 )
@@ -14,7 +13,7 @@ type dockerManager struct {
 	image           string
 	imageFromOCIDir string
 	env             map[string]string
-	commandExecutor docker.CommandExecutor
+	commandExecutor CommandExecutor
 	privileged      bool
 	user            string
 }
@@ -84,7 +83,7 @@ func (d *dockerManager) Run(
 	if len(d.image) > 0 {
 		imageName = d.image
 	} else if len(d.imageFromOCIDir) > 0 {
-		importer := docker.NewImportOCI(
+		importer := NewImportOCI(
 			d.imageFromOCIDir,
 			d.commandExecutor,
 		)
@@ -143,7 +142,7 @@ func (d *dockerManager) User(s string) {
 	d.user = s
 }
 
-func NewDockerManager(runner docker.CommandExecutor) *dockerManager {
+func NewDockerManager(runner CommandExecutor) *dockerManager {
 	return &dockerManager{
 		volumes:         map[string]string{},
 		env:             map[string]string{},

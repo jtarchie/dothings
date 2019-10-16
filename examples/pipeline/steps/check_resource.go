@@ -17,13 +17,13 @@ type CheckResource struct {
 	resource         *models.Resource
 	versionManager   versionManager
 	timestamp        int64
-	containerManager containerManager
+	containerManager ContainerManager
 }
 
 func NewCheckResource(
 	r *models.Resource,
 	version versionManager,
-	container containerManager,
+	container ContainerManager,
 ) *CheckResource {
 	return &CheckResource{
 		resource:         r,
