@@ -21,8 +21,6 @@ jobs:
         go mod download
 
     - name: Test
-      run: |
-        go install github.com/onsi/ginkgo/ginkgo
-        ginkgo -r -p -race
+      run: go test ./...
 
    
